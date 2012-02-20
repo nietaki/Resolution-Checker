@@ -1,0 +1,106 @@
+## -- Function File : rectangle(m,n,a,b,fmt)
+##
+##     Draws a rectangle defined by:
+##     1) One rectangle - left bottom corner and length of side a and b; m,n are vectors, a is scalar
+##     2) One rectangle - left bottom corner and right top corner;m and n are matrix 1x2, a is omitted
+##     3) N-rectangles - left bottom corner and right top corners;m(1x2) and n (Nx2) are matrix, a is omitted
+##     4) N-rectangles - left bottom corners and right top corner;m(Nx2) and n (1x2) are matrix, a is omitted
+##     5) N-rectangles - left bottom corners and right top corners;m(Nx2) and n (Nx2) are matrix, a is omitted
+##
+##     Parameter m is points in axe x, parameter n is points in axe y.
+##     Parameter fmt is format of rectangle(s). It is same as function plot:
+##     Color of line, format of points, format of line.
+##    
+##     Examples:
+##     ad 1) rectangle(2,1,2,5,"b^--");
+##     ad 2) rectangle([0 2],[0 4]);
+##     ad 3) rectangle([-1 2],[2 5;1 6],"g^--");
+##     ad 4) rectangle([2 5;1 6],[-1 2],"g^--");
+##     ad 5) rectangle([1 3;6 4;2 3],[0 3;2 7;1 5]); 
+
+
+## Author: David Prokop
+
+function rectangle(m,n,a,b,fmt)
+
+  if (isscalar(m)&&isscalar(n)&&isscalar(a)&&isscalar(b))
+    ## One rectangle - left bottom corner and length of side a and b; m,n are vectors, a is scalar
+    if(nargin==4)
+      fmt="-";
+    endif
+    a=abs(a);
+    b=abs(b);
+    x1=m;
+    x2=a+m;
+    y1=n;
+    y2=n+b;
+    x=[x1,x2,x2,x1,x1];
+    y=[y1,y1,y2,y2,y1];
+    if(a==0 || b==0)
+      error("Zero length of side");
+    endif
+  elseif (nargin==2 || nargin==3)
+    if(columns(m)!=2 || columns(n)!=2)
+      error("Wrong number of columns");
+    endif
+    if(nargin==2)
+      fmt="-";
+    else
+      fmt=a;
+    endif
+    ## One rectangle - left bottom corner and right top corner;m and n are matrix 1x2, a is omitted
+    x=[m(1,1),m(1,2),m(1,2),m(1,1),m(1,1)];
+    y=[n(1,1),n(1,1),n(1,2),n(1,2),n(1,1)];
+    a=abs(m(1,2)-m(1,1));
+    b=abs(n(1,2)-n(1,1));
+    if(a==0 || b==0)
+      error("This isn't rectangle");
+    endif
+  if (isvector (m) && isvector (n))
+  ## N-rectangles - left bottom corner and right top corners;m(1x2) and n (Nx2) are matrix, a is omitted
+  elseif (isvector (m) && ismatrix (n))
+    for i = 2:rows(n)
+      y=[y;n(i,1),n(i,1),n(i,2),n(i,2),n(i,1)];
+      b=abs(n(i,2)-n(i,1));
+      if (b==0 || b==0)
+        error ("This isn't rectangle");
+      endif
+    endfor
+    ## function plot scaling columns, therefore transpose
+    x=transpose(x);
+    y=transpose(y);
+   ## N-rectangles - left bottom corners and right top corner;m(Nx2) and n (1x2) are matrix, a is omitted
+  elseif (ismatrix (m) && isvector (n))
+    for i = 2:rows(m)
+      x=[x;m(i,1),m(i,2),m(i,2),m(i,1),m(i,1)];
+      a=abs(m(i,2)-m(i,1));
+      if (a==0)
+        error ("This isn't rectangle");
+      endif
+    endfor
+    x=transpose(x);
+    y=transpose(y);
+  ## N-rectangles - left bottom corners and right top corners;m(Nx2) and n (Nx2) are matrix, a is omitted
+  elseif (ismatrix (m) && ismatrix (n))    
+    for i = 2:rows(n)
+      x=[x;m(i,1),m(i,2),m(i,2),m(i,1),m(i,1)];
+      y=[y;n(i,1),n(i,1),n(i,2),n(i,2),n(i,1)];
+      a=abs(m(i,2)-m(i,1));
+      b=abs(n(i,2)-n(i,1));
+      if (a==0 || b==0)
+        error ("This isn't rectangle");
+      endif
+    endfor
+    x=transpose(x);
+    y=transpose(y);
+  endif
+  else
+    error ("Wrong number of arguments");
+
+  endif
+
+  plot(x,y,fmt);
+  %axis([min(min(x))-1,max(max(x))+1,min(min(y))-1,max(max(y))+1]);
+  
+
+endfunction
